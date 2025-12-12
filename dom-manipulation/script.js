@@ -201,8 +201,8 @@ function importFromJsonFile(event) {
   reader.readAsText(file);
 }
 
-/* ====== Server Sync (Periodic) ====== */
-async function fetchQuotesFromServer() {
+/* ====== Sync Quotes with Server ====== */
+async function syncQuotes() {
   try {
     const response = await fetch(SERVER_URL);
     const serverData = await response.json();
@@ -231,12 +231,12 @@ async function fetchQuotesFromServer() {
       };
     }
   } catch (err) {
-    console.warn("Error fetching server data:", err);
+    console.warn("Error syncing quotes with server:", err);
   }
 }
 
 // Periodic sync every 15 seconds
-setInterval(fetchQuotesFromServer, 15000);
+setInterval(syncQuotes, 15000);
 
 /* ====== Event Listeners ====== */
 if (newQuoteBtn) newQuoteBtn.addEventListener("click", showRandomQuote);
