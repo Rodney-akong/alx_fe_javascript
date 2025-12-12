@@ -201,7 +201,7 @@ function importFromJsonFile(event) {
   reader.readAsText(file);
 }
 
-/* ====== Fetch Quotes From Server (once) ====== */
+/* ====== Fetch Quotes From Server (once on page load) ====== */
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_URL);
@@ -221,7 +221,7 @@ async function fetchQuotesFromServer() {
   }
 }
 
-/* ====== Sync Quotes with Server (Periodic) ====== */
+/* ====== Sync Quotes with Server (Periodic + Notification) ====== */
 async function syncQuotes() {
   try {
     const response = await fetch(SERVER_URL);
@@ -233,9 +233,14 @@ async function syncQuotes() {
     }));
 
     const conflict = JSON.stringify(serverQuotes) !== JSON.stringify(quotes);
+
     if (conflict) {
+      // Show conflict UI
       syncNotification.style.display = "block";
       syncMessage.textContent = "Server data is different from local data. Choose which to keep.";
+      acceptServerBtn.style.display = "inline-block";
+      keepLocalBtn.style.display = "inline-block";
+
       acceptServerBtn.onclick = () => {
         quotes = serverQuotes;
         saveQuotes();
@@ -247,6 +252,17 @@ async function syncQuotes() {
         saveQuotes();
         syncNotification.style.display = "none";
       };
+    } else {
+      // No conflict — show success message briefly
+      syncNotification.style.display = "block";
+      syncMessage.textContent = "Quotes synced with server!";
+      acceptServerBtn.style.display = "none";
+      keepLocalBtn.style.display = "none";
+      setTimeout(() => {
+        syncNotification.style.display = "none";
+        acceptServerBtn.style.display = "inline-block";
+        keepLocalBtn.style.display = "inline-block";
+      }, 3000);
     }
   } catch (err) {
     console.warn("Error syncing quotes with server:", err);
@@ -266,5 +282,5 @@ if (categoryFilter) categoryFilter.addEventListener("change", filterQuotes);
 /* ====== Initialize ====== */
 createAddQuoteForm();
 populateCategories();
-fetchQuotesFromServer(); // fetch on page load
+fetchQuotesFromServer(); // fetch once on page load
 showRandomQuote();
