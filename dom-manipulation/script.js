@@ -8,6 +8,7 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
 /* ====== DOM selectors ====== */
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
+const categoryFilter = document.getElementById("categoryFilter");
 
 let addQuoteBtn = document.getElementById("addQuoteBtn");
 let newQuoteTextInput = document.getElementById("newQuoteText");
@@ -16,22 +17,59 @@ let newQuoteCategoryInput = document.getElementById("newQuoteCategory");
 const exportJsonBtn = document.getElementById("exportJsonBtn");
 const importFileInput = document.getElementById("importFile");
 
-/* ====== Save Quotes to LocalStorage ====== */
+/* ====== Helper: escape HTML ====== */
+function escapeHtml(str) {
+  return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+/* ====== Save quotes to localStorage ====== */
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
-/* ====== Show a random quote ====== */
+/* ====== Populate category dropdown dynamically ====== */
+function populateCategories() {
+  // Collect unique categories
+  const categories = [...new Set(quotes.map(q => q.category.toLowerCase()))];
+  
+  // Clear dropdown except 'all'
+  categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+
+  categories.forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+    categoryFilter.appendChild(option);
+  });
+
+  // Restore last selected category from localStorage
+  const lastSelected = localStorage.getItem("lastCategoryFilter") || "all";
+  categoryFilter.value = lastSelected;
+}
+
+/* ====== Show a random quote (filtered) ====== */
 function showRandomQuote() {
   if (!quoteDisplay) return;
 
-  if (quotes.length === 0) {
-    quoteDisplay.textContent = "No quotes available.";
+  let filteredQuotes = quotes;
+  const selectedCategory = categoryFilter.value;
+
+  if (selectedCategory && selectedCategory !== "all") {
+    filteredQuotes = quotes.filter(q => q.category.toLowerCase() === selectedCategory.toLowerCase());
+  }
+
+  if (filteredQuotes.length === 0) {
+    quoteDisplay.textContent = "No quotes available for this category.";
     return;
   }
 
-  const randomIndex = Math.floor(Math.random() * quotes.length);
-  const chosenQuote = quotes[randomIndex];
+  const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+  const chosenQuote = filteredQuotes[randomIndex];
 
   quoteDisplay.innerHTML = `
     <p><strong>Quote:</strong> ${escapeHtml(chosenQuote.text)}</p>
@@ -40,6 +78,12 @@ function showRandomQuote() {
 
   // Save last viewed quote to sessionStorage
   sessionStorage.setItem("lastViewedQuote", JSON.stringify(chosenQuote));
+}
+
+/* ====== Filter quotes when category changes ====== */
+function filterQuotes() {
+  localStorage.setItem("lastCategoryFilter", categoryFilter.value);
+  showRandomQuote();
 }
 
 /* ====== Add a new quote manually ====== */
@@ -60,16 +104,16 @@ function addQuote() {
 
   quotes.push({ text, category });
 
-  // Save to storage
   saveQuotes();
-
   newQuoteTextInput.value = "";
   newQuoteCategoryInput.value = "";
+
+  populateCategories(); // Update dropdown with new category if added
 
   quoteDisplay.innerHTML = `<p>Added: "${escapeHtml(text)}" — ${escapeHtml(category)}</p>`;
 }
 
-/* ====== Create add-quote form dynamically (if missing) ====== */
+/* ====== Create add-quote form dynamically ====== */
 function createAddQuoteForm() {
   if (newQuoteTextInput && newQuoteCategoryInput && addQuoteBtn) {
     addQuoteBtn.removeEventListener("click", addQuote);
@@ -110,16 +154,6 @@ function createAddQuoteForm() {
   addQuoteBtn.addEventListener("click", addQuote);
 }
 
-/* ====== Escape HTML to prevent injection ====== */
-function escapeHtml(str) {
-  return str
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
 /* ====== Export quotes as JSON ====== */
 function exportQuotesAsJson() {
   const data = JSON.stringify(quotes, null, 2);
@@ -152,8 +186,10 @@ function importFromJsonFile(event) {
 
       quotes.push(...importedQuotes);
       saveQuotes();
+      populateCategories();
 
       alert("Quotes imported!");
+      showRandomQuote();
     } catch (err) {
       alert("Error reading JSON file");
     }
@@ -167,7 +203,9 @@ if (newQuoteBtn) newQuoteBtn.addEventListener("click", showRandomQuote);
 if (addQuoteBtn) addQuoteBtn.addEventListener("click", addQuote);
 if (exportJsonBtn) exportJsonBtn.addEventListener("click", exportQuotesAsJson);
 if (importFileInput) importFileInput.addEventListener("change", importFromJsonFile);
+if (categoryFilter) categoryFilter.addEventListener("change", filterQuotes);
 
-/* ====== Show initial quote ====== */
+/* ====== Initialize ====== */
 createAddQuoteForm();
+populateCategories();
 showRandomQuote();
