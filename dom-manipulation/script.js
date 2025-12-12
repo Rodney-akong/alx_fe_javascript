@@ -201,19 +201,37 @@ function importFromJsonFile(event) {
   reader.readAsText(file);
 }
 
-/* ====== Sync Quotes with Server ====== */
-async function syncQuotes() {
+/* ====== Fetch Quotes From Server (once) ====== */
+async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_URL);
     const serverData = await response.json();
 
-    // Map to quotes format (simulate)
     const serverQuotes = serverData.slice(0, 5).map(item => ({
       text: item.title,
       category: "server"
     }));
 
-    // Detect conflict
+    quotes.push(...serverQuotes);
+    saveQuotes();
+    populateCategories();
+    showRandomQuote();
+  } catch (err) {
+    console.warn("Error fetching quotes from server:", err);
+  }
+}
+
+/* ====== Sync Quotes with Server (Periodic) ====== */
+async function syncQuotes() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const serverData = await response.json();
+
+    const serverQuotes = serverData.slice(0, 5).map(item => ({
+      text: item.title,
+      category: "server"
+    }));
+
     const conflict = JSON.stringify(serverQuotes) !== JSON.stringify(quotes);
     if (conflict) {
       syncNotification.style.display = "block";
@@ -248,4 +266,5 @@ if (categoryFilter) categoryFilter.addEventListener("change", filterQuotes);
 /* ====== Initialize ====== */
 createAddQuoteForm();
 populateCategories();
+fetchQuotesFromServer(); // fetch on page load
 showRandomQuote();
