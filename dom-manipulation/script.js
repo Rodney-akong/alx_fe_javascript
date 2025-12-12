@@ -183,7 +183,7 @@ function importFromJsonFile(event) {
 /* ====== Server Sync ====== */
 const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
 
-async function fetchServerQuotes() {
+async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_URL);
     const serverData = await response.json();
@@ -217,7 +217,7 @@ async function fetchServerQuotes() {
 }
 
 // Periodic sync every 15 seconds
-setInterval(fetchServerQuotes, 15000);
+setInterval(fetchQuotesFromServer, 15000);
 
 /* ====== Event Listeners ====== */
 if (newQuoteBtn) newQuoteBtn.addEventListener("click", showRandomQuote);
