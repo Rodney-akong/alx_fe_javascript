@@ -83,8 +83,11 @@ function filterQuotes() {
   showRandomQuote();
 }
 
+/* ====== Server Config ====== */
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
+
 /* ====== Add Quote ====== */
-function addQuote() {
+async function addQuote() {
   if (!newQuoteTextInput || !newQuoteCategoryInput) return;
 
   const text = newQuoteTextInput.value.trim();
@@ -94,13 +97,31 @@ function addQuote() {
     return;
   }
 
-  quotes.push({ text, category });
+  // Add locally
+  const newQuoteObj = { text, category };
+  quotes.push(newQuoteObj);
   saveQuotes();
+
+  // Reset inputs
   newQuoteTextInput.value = "";
   newQuoteCategoryInput.value = "";
 
+  // Update categories & display
   populateCategories();
   showRandomQuote();
+
+  // POST new quote to server (mock)
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newQuoteObj)
+    });
+    const data = await response.json();
+    console.log("Posted to server:", data);
+  } catch (err) {
+    console.warn("Error posting to server:", err);
+  }
 }
 
 /* ====== Create Add Quote Form dynamically ====== */
@@ -180,9 +201,7 @@ function importFromJsonFile(event) {
   reader.readAsText(file);
 }
 
-/* ====== Server Sync ====== */
-const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
-
+/* ====== Server Sync (Periodic) ====== */
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_URL);
