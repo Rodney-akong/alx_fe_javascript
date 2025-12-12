@@ -1,0 +1,8 @@
+body { font-family: system-ui, -apple-system, sans-serif; padding: 2rem; max-width: 800px; margin: auto; }
+#quoteDisplay { margin: 1.5rem 0; padding: 1rem; border-radius: 8px; background: #f7f7f7; min-height: 80px; display:flex; flex-direction:column; justify-content:center }
+#quoteText { font-size: 1.25rem; margin-bottom: .5rem }
+#quoteCategory { font-size: .9rem; color:#666 }
+.controls { display:flex; gap: .5rem; align-items:center }
+.controls select, .controls button { padding: .5rem .75rem }
+.add-form { margin-top: 1rem; display:flex; gap:.5rem; flex-wrap:wrap }
+.add-form input { padding:.5rem .5rem; flex:1; min-width:180px }
