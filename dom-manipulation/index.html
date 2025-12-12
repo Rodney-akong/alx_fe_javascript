@@ -1,31 +1,27 @@
 <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Quote Generator</title>
-    <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
-    <h1>Dynamic Quote Generator</h1>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Quote Generator</title>
+</head>
+<body>
+  <h1>Dynamic Quote Generator</h1>
 
+  <!-- Where the quote will show -->
+  <div id="quoteDisplay"></div>
 
-    <div class="controls">
-        <label for="categorySelect">Category</label>
-        <select id="categorySelect"></select>
-        <button id="newQuote">Show New Quote</button>
-    </div>
+  <!-- Button to show a new random quote -->
+  <button id="newQuote">Show New Quote</button>
 
+  <hr>
 
-    <div id="quoteDisplay">
-        <div id="quoteText">Click "Show New Quote" to display a quote</div>
-        <div id="quoteCategory"></div>
-    </div>
+  <!-- Form to add a new quote -->
+  <h3>Add a New Quote</h3>
+  <input id="newQuoteText" type="text" placeholder="Enter a new quote">
+  <input id="newQuoteCategory" type="text" placeholder="Enter quote category">
+  <button id="addQuoteBtn">Add Quote</button>
 
-
-    <div id="formContainer"></div>
-
-
-    <script src="script.js"></script>
-  </body>
-  </html>
+  <script src="script.js"></script>
+</body>
+</html>
